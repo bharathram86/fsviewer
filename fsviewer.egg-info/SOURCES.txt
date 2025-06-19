@@ -1,0 +1,10 @@
+README.md
+setup.py
+fsviewer/__init__.py
+fsviewer/gui.py
+fsviewer.egg-info/PKG-INFO
+fsviewer.egg-info/SOURCES.txt
+fsviewer.egg-info/dependency_links.txt
+fsviewer.egg-info/entry_points.txt
+fsviewer.egg-info/requires.txt
+fsviewer.egg-info/top_level.txt

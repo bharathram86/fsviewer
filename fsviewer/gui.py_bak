@@ -1,0 +1,90 @@
+# fsviewer/gui.py
+
+    import os
+    import subprocess
+    import tkinter as tk
+    from tkinter import messagebox, ttk
+    import matplotlib.pyplot as plt
+    from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+def start_gui():
+
+def get_directory_size(path):
+    try:
+        output = subprocess.check_output(['du', '-sb', path], stderr=subprocess.DEVNULL)
+        size = int(output.decode().split()[0])
+        return size
+    except Exception:
+        return 0
+
+def get_usage(base_path):
+    usage = {}
+    skip_dirs = {'proc', 'sys', 'run', 'dev', 'tmp', 'boot', 'lost+found', 'snap', 'mnt', 'media'}
+
+    with os.scandir(base_path) as entries:
+        for entry in entries:
+            if entry.is_dir(follow_symlinks=False) and entry.name not in skip_dirs:
+                full_path = os.path.join(base_path, entry.name)
+                size = get_directory_size(full_path)
+                usage[entry.name] = size
+    return usage
+
+class DiskUsageGUI:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Linux File System Usage Viewer")
+
+        self.base_path = tk.StringVar(value="/")
+
+        self.setup_widgets()
+
+    def setup_widgets(self):
+        frame = ttk.Frame(self.root, padding="10")
+        frame.grid(row=0, column=0, sticky="nsew")
+
+        ttk.Label(frame, text="Base Path:").grid(row=0, column=0, sticky="w")
+        self.path_entry = ttk.Entry(frame, textvariable=self.base_path, width=40)
+        self.path_entry.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+
+        scan_btn = ttk.Button(frame, text="Scan & Show Usage", command=self.scan_and_plot)
+        scan_btn.grid(row=0, column=2, padx=5)
+
+        self.canvas_frame = ttk.Frame(self.root)
+        self.canvas_frame.grid(row=1, column=0, sticky="nsew")
+        self.root.rowconfigure(1, weight=1)
+        self.root.columnconfigure(0, weight=1)
+
+    def scan_and_plot(self):
+        path = self.base_path.get()
+        if not os.path.isdir(path):
+            messagebox.showerror("Invalid Path", f"{path} is not a valid directory.")
+            return
+
+        usage = get_usage(path)
+        if not usage:
+            messagebox.showinfo("No Data", "No usable directories found.")
+            return
+
+        self.plot_chart(usage)
+
+    def plot_chart(self, usage):
+        for widget in self.canvas_frame.winfo_children():
+            widget.destroy()
+
+        fig, ax = plt.subplots(figsize=(6, 6))
+        labels = list(usage.keys())
+        sizes = list(usage.values())
+
+        ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
+        ax.axis("equal")
+        ax.set_title(f"Disk Usage in {self.base_path.get()}")
+
+        canvas = FigureCanvasTkAgg(fig, master=self.canvas_frame)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = DiskUsageGUI(root)
+    root.mainloop()
+

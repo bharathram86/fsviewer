@@ -1,0 +1,10 @@
+README.md
+setup.py
+filesystem_usage_viewer.egg-info/PKG-INFO
+filesystem_usage_viewer.egg-info/SOURCES.txt
+filesystem_usage_viewer.egg-info/dependency_links.txt
+filesystem_usage_viewer.egg-info/entry_points.txt
+filesystem_usage_viewer.egg-info/requires.txt
+filesystem_usage_viewer.egg-info/top_level.txt
+fsviewer/__init__.py
+fsviewer/gui.py
